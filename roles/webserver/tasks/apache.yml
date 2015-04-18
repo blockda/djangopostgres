@@ -1,0 +1,47 @@
+---
+- name: Install Apache2
+  apt: name=apache2 state=present
+
+- name: Copy virtual host configuration
+  template: 
+    src=virtual-host.conf.j2 
+    dest=/etc/apache2/sites-available/vagrant.conf
+  notify: reload apache
+
+- name: Copy tls virtual host configuration
+  template:
+    src=tls-virtual-host.conf.j2
+    dest=/etc/apache2/sites-available/tls-vagrant.conf
+  notify: reload apache
+
+- name: Remove default apache virtual host configuration
+  file:
+    path=/etc/apache2/sites-enabled/000-default.conf
+    state=absent
+  notify: reload apache
+
+- name: Enable new virtual host configuration
+  file:
+    src=/etc/apache2/sites-available/vagrant.conf
+    dest=/etc/apache2/sites-enabled/vagrant.conf
+    state=link
+  notify: reload apache
+
+- name: Enable new virtual host configuration
+  file:
+    src=/etc/apache2/sites-available/tls-vagrant.conf
+    dest=/etc/apache2/sites-enabled/tls-vagrant.conf
+    state=link
+  notify: reload apache
+
+- name: Enable mod rewrite
+  apache2_module: name=rewrite
+  notify: reload apache
+
+- name: Enable ssh modeule
+  apache2_module: name=ssl
+  notify: reload apache
+
+
+  
+

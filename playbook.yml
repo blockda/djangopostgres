@@ -1,0 +1,12 @@
+---
+- hosts: all
+  sudo: true
+  vars:
+    document_root: /vagrant/www/public
+  pre_tasks:
+    - name: update apt package
+      apt: upgrade=dist
+    - name: update apt cache
+      apt: update_cache=yes
+  roles:
+    - database

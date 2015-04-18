@@ -1,0 +1,33 @@
+---
+- name: Install PHP and associated packages
+  apt: name=libapache2-mod-php5 state=present
+
+- name: Enable apache mod_php module
+  apache2_module: name=php5
+
+- name: Install pdo_mysql
+  apt: name=php5-mysql state=present
+
+- name: Install Curl
+  apt: name=curl state=present
+
+- name: Install Composer globally
+  shell:  curl -sS https://getcomposer.org/installer | /usr/bin/php && /bin/mv -f composer.phar {{ composer_path }} creates={{ composer_path }}
+
+- name: Create global .composer folder
+  file: path={{ composer_user_home }}/.composer owner={{ composer_user }} state=directory
+
+- name: Create global composer.json file
+  template: src=composer.j2 dest={{ composer_user_home }}/.composer/composer.json owner={{ composer_user }}
+  register: create_composer_file
+
+#- name: Install the composer.json file only if it was updated
+#  shell: /usr/local/bin/composer global update --no-interaction --no-ansi
+#  when: create_composer_file|changed
+#  sudo_user: "{{ composer_user }}"
+
+- name: Add global composer bin directory to PATH
+  lineinfile: dest={{composer_user_home}}/.bashrc line="export PATH=~/.composer/vendor/bin:$PATH" owner={{ composer_user }} group={{ composer_user }}
+
+- name: Add global composer bin directory to PATH
+  lineinfile: dest={{composer_user_home}}/.bashrc line="export PATH={{ composer_path_dir }}:$PATH" owner={{ composer_user }} group={{ composer_user }}
